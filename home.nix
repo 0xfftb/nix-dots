@@ -39,8 +39,9 @@
       gcb = "git checkout -b";
       gs = "git switch";
       gaa = "git add .";
-      gmm = "git commit -m";
+      gcm = "git commit -m";
       gpsup = "git push --set-upstream origin $(git branch --show-current)";
+      sc = "yt-dlp --extractor-args 'soundcloud:formats=*_mp3'";
     };
 
     interactiveShellInit = ''
@@ -98,6 +99,7 @@
     allowUnfreePredicate = pkg: builtins.elem (pkgs.lib.getName pkg) [
       "obsidian"
       "raycast"
+      "claude-code"
     ];
   };
 
@@ -112,7 +114,6 @@
     neovim
     tldr
     aerospace
-    sketchybar
     keepassxc
     gnupg
     vlc-bin
@@ -125,6 +126,14 @@
     fish
     tree
     fd
+    yt-dlp
+    audacity
+    claude-code
+    docker
+    docker-compose
+    colima
+    libb2
+    nomacs
   ];
 
   home.file = { };
