@@ -1,9 +1,19 @@
 { config, pkgs, ... }:
+
+let
+  # Import the rust-overlay
+  rust-overlay = builtins.fetchTarball "https://github.com/oxalica/rust-overlay/archive/master.tar.gz";
+  # Apply the overlay to your nixpkgs
+  pkgs-with-rust-overlay = import <nixpkgs> {
+    overlays = [ (import rust-overlay) ];
+  };
+  # Use the extended pkgs for rust-bin specifically
+  rustPkgs = pkgs-with-rust-overlay;
+in
 {
   home.username = "neo";
   home.homeDirectory = "/Users/neo";
   home.stateVersion = "24.11";
-
   nix = {
     package = pkgs.nix;
     settings = {
@@ -11,7 +21,6 @@
       warn-dirty = false;
     };
   };
-
   programs.git = {
     enable = true;
     extraConfig = {
@@ -25,7 +34,6 @@
       # Disable the welcome message
       set -g fish_greeting ""
     '';
-
     shellAliases = {
       hms = "home-manager switch";
       cd = "z";
@@ -38,50 +46,54 @@
       gd = "git diff";
       gcb = "git checkout -b";
       gs = "git switch";
+      gc = "git clone";
       gaa = "git add .";
       gcm = "git commit -m";
       gpsup = "git push --set-upstream origin $(git branch --show-current)";
       sc = "yt-dlp --extractor-args 'soundcloud:formats=*_mp3'";
     };
-
     interactiveShellInit = ''
       fish_add_path ~/.nix-profile/bin
       fish_add_path /nix/var/nix/profiles/default/bin
       fish_add_path /run/current-system/sw/bin
-    
+      fish_add_path ~/.npm-global/bin
+      fish_add_path ~/.bb/bbup
+      fish_add_path ~/.foundry/bin
+      fish_add_path ~/.bun/bin
+      fish_add_path ~/.nargo/bin
+      fish_add_path ~/.bb
+  
       if test -e /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.fish
         source /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.fish
       end
-    
+  
       if test -e ~/.nix-profile/etc/profile.d/hm-session-vars.fish
         source ~/.nix-profile/etc/profile.d/hm-session-vars.fish
       end
-    
+
+      source ~/.secrets
+  
       set -gx GPG_TTY (tty)
-    
+  
       fish_vi_key_bindings
       set fish_cursor_default block
       set fish_cursor_insert line
       set fish_cursor_replace underscore
       set fish_cursor_replace_one underscore
       set fish_cursor_visual block
-
       if command -v zoxide >/dev/null
         zoxide init fish | source
       end
-    
+  
       if command -v direnv >/dev/null
         direnv hook fish | source
       end
-
       source ${pkgs.fzf}/share/fish/vendor_functions.d/fzf_key_bindings.fish
-
       if functions -q fzf_key_bindings
-
         # Set custom key bindings
         bind \eq fzf-file-widget  # Ctrl+F for file search
         bind \ew fzf-history-widget  # Ctrl+H for history search
-        
+      
         # Insert mode bindings (for vi mode)
         bind -M insert \eq fzf-file-widget
         bind -M insert \ew fzf-history-widget
@@ -99,10 +111,11 @@
     allowUnfreePredicate = pkg: builtins.elem (pkgs.lib.getName pkg) [
       "obsidian"
       "raycast"
-      "claude-code"
+      "unrar"
     ];
   };
 
+  # Define rustToolchain using the extended pkgs with rust-overlay
   home.packages = with pkgs; [
     ripgrep
     dust
@@ -113,7 +126,6 @@
     neofetch
     neovim
     tldr
-    aerospace
     keepassxc
     gnupg
     vlc-bin
@@ -128,22 +140,31 @@
     fd
     yt-dlp
     audacity
-    claude-code
     docker
     docker-compose
     colima
     libb2
-    nomacs
+    nodejs
+    unrar
+    qview
+    yarn
+    pnpm
+    bun
+    netcat
+    diff-so-fancy
+    librewolf
+    kitty
+    localsend
+    circom
+    ollama
+    codex
+    qbittorrent
   ];
-
   home.file = { };
-
   home.sessionVariables = {
     EDITOR = "nvim";
   };
-
   programs.home-manager.enable = true;
-
   programs.direnv = {
     enable = true;
     nix-direnv.enable = true;
